@@ -3,11 +3,9 @@
 
 # Symbols present in the vdso
 vdso-syms  = rt_sigreturn
-ifdef CONFIG_64BIT
 vdso-syms += gettimeofday
 vdso-syms += clock_gettime
 vdso-syms += clock_getres
-endif
 vdso-syms += getcpu
 vdso-syms += flush_icache
 
