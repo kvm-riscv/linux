@@ -77,6 +77,8 @@ head-y := arch/riscv/kernel/head.o
 
 core-y += arch/riscv/
 
+core-$(CONFIG_KVM) += arch/riscv/kvm/
+
 libs-y += arch/riscv/lib/
 
 PHONY += vdso_install
