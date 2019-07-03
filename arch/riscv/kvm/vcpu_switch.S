@@ -192,3 +192,17 @@ __kvm_switch_return:
 	/* Return to C code */
 	ret
 ENDPROC(__kvm_riscv_switch_to)
+
+ENTRY(__kvm_riscv_unpriv_trap)
+	/*
+	 * We assume that faulting unpriv load/store instruction is
+	 * is 4-byte long and blindly increment SEPC by 4.
+	 *
+	 * The trap exception cause will be saved in 'A0' register.
+	 */
+	csrr	a0, CSR_SEPC
+	addi	a0, a0, 4
+	csrw	CSR_SEPC, a0
+	csrr	a0, CSR_SCAUSE
+	sret
+ENDPROC(__kvm_riscv_unpriv_trap)
