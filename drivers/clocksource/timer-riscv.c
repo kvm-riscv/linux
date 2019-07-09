@@ -12,6 +12,7 @@
 #include <linux/cpu.h>
 #include <linux/delay.h>
 #include <linux/irq.h>
+#include <linux/module.h>
 #include <linux/sched_clock.h>
 #include <linux/io-64-nonatomic-lo-hi.h>
 #include <asm/smp.h>
@@ -85,6 +86,13 @@ static int riscv_timer_dying_cpu(unsigned int cpu)
 	csr_clear(CSR_IE, IE_TIE);
 	return 0;
 }
+
+void riscv_cs_get_mult_shift(u32 *mult, u32 *shift)
+{
+	*mult = riscv_clocksource.mult;
+	*shift = riscv_clocksource.shift;
+}
+EXPORT_SYMBOL_GPL(riscv_cs_get_mult_shift);
 
 /* called directly from the low-level interrupt handler */
 void riscv_timer_interrupt(void)
