@@ -64,10 +64,14 @@ void __init setup_smp(void)
 	int hart;
 	bool found_boot_cpu = false;
 	int cpuid = 1;
+	const char *isa;
 
 	for_each_of_cpu_node(dn) {
 		hart = riscv_of_processor_hartid(dn);
 		if (hart < 0)
+			continue;
+
+		if (riscv_read_check_isa(dn, &isa) < 0)
 			continue;
 
 		if (hart == cpuid_to_hartid_map(0)) {

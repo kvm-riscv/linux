@@ -74,6 +74,7 @@ static inline void wait_for_interrupt(void)
 }
 
 struct device_node;
+int riscv_read_check_isa(struct device_node *node, const char **isa);
 int riscv_of_processor_hartid(struct device_node *node);
 
 extern void riscv_fill_hwcap(void);

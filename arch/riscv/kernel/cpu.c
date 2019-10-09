@@ -8,13 +8,43 @@
 #include <linux/of.h>
 #include <asm/smp.h>
 
+int riscv_read_check_isa(struct device_node *node, const char **isa)
+{
+	u32 hart;
+
+	if (of_property_read_u32(node, "reg", &hart)) {
+		pr_warn("Found CPU without hart ID\n");
+		return -ENODEV;
+	}
+
+	if (of_property_read_string(node, "riscv,isa", isa)) {
+		pr_warn("CPU with hartid=%d has no \"riscv,isa\" property\n",
+			hart);
+		return -ENODEV;
+	}
+	/*
+	 * Linux doesn't support rv32e or rv128i, and we only support booting
+	 * kernels on harts with the same ISA that the kernel is compiled for.
+	 */
+	if (IS_ENABLED(CONFIG_32BIT) && (strncmp(*isa, "rv32i", 5) != 0)) {
+		pr_warn("hartid=%d has an invalid ISA \"%s\" for 32bit config\n",
+			hart, *isa);
+		return -ENODEV;
+	} else if (IS_ENABLED(CONFIG_64BIT) &&
+		  (strncmp(*isa, "rv64i", 5) != 0)) {
+		pr_warn("hartid=%d has an invalid ISA \"%s\" for 64bit config\n",
+			hart, *isa);
+		return -ENODEV;
+	}
+	return 0;
+}
+
 /*
  * Returns the hart ID of the given device tree node, or -ENODEV if the node
  * isn't an enabled and valid RISC-V hart node.
  */
 int riscv_of_processor_hartid(struct device_node *node)
 {
-	const char *isa;
 	u32 hart;
 
 	if (!of_device_is_compatible(node, "riscv")) {
@@ -29,15 +59,6 @@ int riscv_of_processor_hartid(struct device_node *node)
 
 	if (!of_device_is_available(node)) {
 		pr_info("CPU with hartid=%d is not available\n", hart);
-		return -ENODEV;
-	}
-
-	if (of_property_read_string(node, "riscv,isa", &isa)) {
-		pr_warn("CPU with hartid=%d has no \"riscv,isa\" property\n", hart);
-		return -ENODEV;
-	}
-	if (isa[0] != 'r' || isa[1] != 'v') {
-		pr_warn("CPU with hartid=%d has an invalid ISA of \"%s\"\n", hart, isa);
 		return -ENODEV;
 	}
 

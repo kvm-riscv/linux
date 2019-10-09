@@ -39,10 +39,8 @@ void riscv_fill_hwcap(void)
 		if (riscv_of_processor_hartid(node) < 0)
 			continue;
 
-		if (of_property_read_string(node, "riscv,isa", &isa)) {
-			pr_warn("Unable to find \"riscv,isa\" devicetree entry\n");
+		if (riscv_read_check_isa(node, &isa) < 0)
 			continue;
-		}
 
 		for (i = 0; i < strlen(isa); ++i)
 			this_hwcap |= isa2hwcap[(unsigned char)(isa[i])];
