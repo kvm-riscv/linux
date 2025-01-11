@@ -103,12 +103,80 @@ static long kvm_sbi_fwft_get_misaligned_delegation(struct kvm_vcpu *vcpu,
 	return SBI_SUCCESS;
 }
 
+static bool try_to_set_pmm(unsigned long value)
+{
+	csr_set(CSR_HENVCFG, value);
+	return (csr_read_clear(CSR_HENVCFG, ENVCFG_PMM) & ENVCFG_PMM) == value;
+}
+
+static bool kvm_sbi_fwft_pointer_masking_pmlen_supported(struct kvm_vcpu *vcpu)
+{
+	struct kvm_sbi_fwft *fwft = vcpu_to_fwft(vcpu);
+
+	if (!riscv_isa_extension_available(vcpu->arch.isa, SMNPM))
+		return false;
+
+	fwft->have_vs_pmlen_7 = try_to_set_pmm(ENVCFG_PMM_PMLEN_7);
+	fwft->have_vs_pmlen_16 = try_to_set_pmm(ENVCFG_PMM_PMLEN_16);
+
+	return fwft->have_vs_pmlen_7 || fwft->have_vs_pmlen_16;
+}
+
+static long kvm_sbi_fwft_set_pointer_masking_pmlen(struct kvm_vcpu *vcpu,
+						   struct kvm_sbi_fwft_config *conf,
+						   unsigned long value)
+{
+	struct kvm_sbi_fwft *fwft = vcpu_to_fwft(vcpu);
+	unsigned long pmm;
+
+	if (value == 0)
+		pmm = ENVCFG_PMM_PMLEN_0;
+	else if (value <= 7 && fwft->have_vs_pmlen_7)
+		pmm = ENVCFG_PMM_PMLEN_7;
+	else if (value <= 16 && fwft->have_vs_pmlen_16)
+		pmm = ENVCFG_PMM_PMLEN_16;
+	else
+		return SBI_ERR_INVALID_PARAM;
+
+	vcpu->arch.cfg.henvcfg &= ~ENVCFG_PMM;
+	vcpu->arch.cfg.henvcfg |= pmm;
+
+	return SBI_SUCCESS;
+}
+
+static long kvm_sbi_fwft_get_pointer_masking_pmlen(struct kvm_vcpu *vcpu,
+						   struct kvm_sbi_fwft_config *conf,
+						   unsigned long *value)
+{
+	switch (vcpu->arch.cfg.henvcfg & ENVCFG_PMM) {
+	case ENVCFG_PMM_PMLEN_0:
+		*value = 0;
+		break;
+	case ENVCFG_PMM_PMLEN_7:
+		*value = 7;
+		break;
+	case ENVCFG_PMM_PMLEN_16:
+		*value = 16;
+		break;
+	default:
+		return SBI_ERR_FAILURE;
+	}
+
+	return SBI_SUCCESS;
+}
+
 static const struct kvm_sbi_fwft_feature features[] = {
 	{
 		.id = SBI_FWFT_MISALIGNED_EXC_DELEG,
 		.supported = kvm_sbi_fwft_misaligned_delegation_supported,
 		.set = kvm_sbi_fwft_set_misaligned_delegation,
 		.get = kvm_sbi_fwft_get_misaligned_delegation,
+	},
+	{
+		.id = SBI_FWFT_POINTER_MASKING_PMLEN,
+		.supported = kvm_sbi_fwft_pointer_masking_pmlen_supported,
+		.set = kvm_sbi_fwft_set_pointer_masking_pmlen,
+		.get = kvm_sbi_fwft_get_pointer_masking_pmlen,
 	},
 };
 

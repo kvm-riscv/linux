@@ -22,6 +22,8 @@ struct kvm_sbi_fwft_config {
 /* FWFT data structure per vcpu */
 struct kvm_sbi_fwft {
 	struct kvm_sbi_fwft_config *configs;
+	bool have_vs_pmlen_7;
+	bool have_vs_pmlen_16;
 };
 
 #define vcpu_to_fwft(vcpu) (&(vcpu)->arch.fwft_context)
