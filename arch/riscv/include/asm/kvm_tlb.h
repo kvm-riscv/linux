@@ -15,7 +15,11 @@ enum kvm_riscv_hfence_type {
 	KVM_RISCV_HFENCE_VVMA_ASID_GVA,
 	KVM_RISCV_HFENCE_VVMA_ASID_ALL,
 	KVM_RISCV_HFENCE_VVMA_GVA,
-	KVM_RISCV_HFENCE_VVMA_ALL
+	KVM_RISCV_HFENCE_VVMA_ALL,
+	KVM_RISCV_NESTED_HFENCE_GVMA_GPA,
+	KVM_RISCV_NESTED_HFENCE_GVMA_VMID_GPA,
+	KVM_RISCV_NESTED_HFENCE_VVMA_GVA,
+	KVM_RISCV_NESTED_HFENCE_VVMA_ASID_GVA,
 };
 
 struct kvm_riscv_hfence {
@@ -55,6 +59,8 @@ void kvm_riscv_tlb_flush_process(struct kvm_vcpu *vcpu);
 void kvm_riscv_fence_i_process(struct kvm_vcpu *vcpu);
 void kvm_riscv_hfence_vvma_all_process(struct kvm_vcpu *vcpu);
 void kvm_riscv_hfence_process(struct kvm_vcpu *vcpu);
+void kvm_riscv_nested_hfence_gvma_all_process(struct kvm_vcpu *vcpu);
+void kvm_riscv_nested_hfence_vvma_all_process(struct kvm_vcpu *vcpu);
 
 void kvm_riscv_fence_i(struct kvm *kvm,
 		       unsigned long hbase, unsigned long hmask);
@@ -80,5 +86,34 @@ void kvm_riscv_hfence_vvma_gva(struct kvm *kvm,
 void kvm_riscv_hfence_vvma_all(struct kvm *kvm,
 			       unsigned long hbase, unsigned long hmask,
 			       unsigned long vmid);
+
+void kvm_riscv_nested_hfence_gvma_gpa(struct kvm *kvm,
+				      unsigned long hbase, unsigned long hmask,
+				      gpa_t gpa, gpa_t gpsz,
+				      unsigned long order);
+void kvm_riscv_nested_hfence_gvma_all(struct kvm *kvm,
+				      unsigned long hbase, unsigned long hmask);
+void kvm_riscv_nested_hfence_gvma_vmid_gpa(struct kvm *kvm,
+					   unsigned long hbase, unsigned long hmask,
+					   gpa_t gpa, gpa_t gpsz,
+					   unsigned long order, unsigned long vmid);
+void kvm_riscv_nested_hfence_gvma_vmid_all(struct kvm *kvm,
+					   unsigned long hbase, unsigned long hmask,
+					   unsigned long vmid);
+void kvm_riscv_nested_hfence_vvma_gva(struct kvm *kvm,
+				      unsigned long hbase, unsigned long hmask,
+				      unsigned long gva, unsigned long gvsz,
+				      unsigned long order, unsigned long vmid);
+void kvm_riscv_nested_hfence_vvma_all(struct kvm *kvm,
+				      unsigned long hbase, unsigned long hmask,
+				      unsigned long vmid);
+void kvm_riscv_nested_hfence_vvma_asid_gva(struct kvm *kvm,
+					   unsigned long hbase, unsigned long hmask,
+					   unsigned long gva, unsigned long gvsz,
+					   unsigned long order, unsigned long asid,
+					   unsigned long vmid);
+void kvm_riscv_nested_hfence_vvma_asid_all(struct kvm *kvm,
+					   unsigned long hbase, unsigned long hmask,
+					   unsigned long asid, unsigned long vmid);
 
 #endif

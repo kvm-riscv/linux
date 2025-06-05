@@ -123,14 +123,67 @@ static int kvm_sbi_ext_rfence_handler(struct kvm_vcpu *vcpu, struct kvm_run *run
 		kvm_riscv_vcpu_pmu_incr_fw(vcpu, SBI_PMU_FW_HFENCE_VVMA_ASID_SENT);
 		break;
 	case SBI_EXT_RFENCE_REMOTE_HFENCE_GVMA:
+		/* Not supported if VCPU does not have H-extension */
+		if (!riscv_isa_extension_available(vcpu->arch.isa, h)) {
+			retdata->err_val = SBI_ERR_NOT_SUPPORTED;
+			break;
+		}
+
+		if ((cp->a2 == 0 && cp->a3 == 0) || cp->a3 == -1UL)
+			kvm_riscv_nested_hfence_gvma_all(vcpu->kvm, hbase, hmask);
+		else
+			kvm_riscv_nested_hfence_gvma_gpa(vcpu->kvm, hbase, hmask,
+							 cp->a2, cp->a3, PAGE_SHIFT);
+		kvm_riscv_vcpu_pmu_incr_fw(vcpu, SBI_PMU_FW_HFENCE_GVMA_SENT);
+		break;
 	case SBI_EXT_RFENCE_REMOTE_HFENCE_GVMA_VMID:
+		/* Not supported if VCPU does not have H-extension */
+		if (!riscv_isa_extension_available(vcpu->arch.isa, h)) {
+			retdata->err_val = SBI_ERR_NOT_SUPPORTED;
+			break;
+		}
+
+		if ((cp->a2 == 0 && cp->a3 == 0) || cp->a3 == -1UL)
+			kvm_riscv_nested_hfence_gvma_vmid_all(vcpu->kvm,
+							      hbase, hmask, cp->a4);
+		else
+			kvm_riscv_nested_hfence_gvma_vmid_gpa(vcpu->kvm, hbase, hmask,
+							      cp->a2, cp->a3,
+							      PAGE_SHIFT, cp->a4);
+		kvm_riscv_vcpu_pmu_incr_fw(vcpu, SBI_PMU_FW_HFENCE_GVMA_VMID_SENT);
+		break;
 	case SBI_EXT_RFENCE_REMOTE_HFENCE_VVMA:
+		/* Not supported if VCPU does not have H-extension */
+		if (!riscv_isa_extension_available(vcpu->arch.isa, h)) {
+			retdata->err_val = SBI_ERR_NOT_SUPPORTED;
+			break;
+		}
+
+		vmid = (vcpu->arch.nested.csr.hgatp & HGATP_VMID) >> HGATP_VMID_SHIFT;
+		if ((cp->a2 == 0 && cp->a3 == 0) || cp->a3 == -1UL)
+			kvm_riscv_nested_hfence_vvma_all(vcpu->kvm, hbase, hmask, vmid);
+		else
+			kvm_riscv_nested_hfence_vvma_gva(vcpu->kvm, hbase, hmask,
+							 cp->a2, cp->a3, PAGE_SHIFT, vmid);
+		kvm_riscv_vcpu_pmu_incr_fw(vcpu, SBI_PMU_FW_HFENCE_VVMA_SENT);
+		break;
 	case SBI_EXT_RFENCE_REMOTE_HFENCE_VVMA_ASID:
-		/*
-		 * Until nested virtualization is implemented, the
-		 * SBI HFENCE calls should return not supported
-		 * hence fallthrough.
-		 */
+		/* Not supported if VCPU does not have H-extension */
+		if (!riscv_isa_extension_available(vcpu->arch.isa, h)) {
+			retdata->err_val = SBI_ERR_NOT_SUPPORTED;
+			break;
+		}
+
+		vmid = (vcpu->arch.nested.csr.hgatp & HGATP_VMID) >> HGATP_VMID_SHIFT;
+		if ((cp->a2 == 0 && cp->a3 == 0) || cp->a3 == -1UL)
+			kvm_riscv_nested_hfence_vvma_asid_all(vcpu->kvm, hbase, hmask,
+							      cp->a4, vmid);
+		else
+			kvm_riscv_nested_hfence_vvma_asid_gva(vcpu->kvm, hbase, hmask,
+							      cp->a2, cp->a3, PAGE_SHIFT,
+							      cp->a4, vmid);
+		kvm_riscv_vcpu_pmu_incr_fw(vcpu, SBI_PMU_FW_HFENCE_VVMA_ASID_SENT);
+		break;
 	default:
 		retdata->err_val = SBI_ERR_NOT_SUPPORTED;
 	}
