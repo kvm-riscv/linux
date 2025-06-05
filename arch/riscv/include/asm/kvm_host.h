@@ -24,6 +24,7 @@
 #include <asm/kvm_vcpu_sbi_fwft.h>
 #include <asm/kvm_vcpu_timer.h>
 #include <asm/kvm_vcpu_pmu.h>
+#include <asm/kvm_vcpu_nested.h>
 
 #define KVM_MAX_VCPUS			1024
 
@@ -44,6 +45,7 @@
 #define KVM_REQ_HFENCE			\
 	KVM_ARCH_REQ_FLAGS(5, KVM_REQUEST_WAIT | KVM_REQUEST_NO_WAKEUP)
 #define KVM_REQ_STEAL_UPDATE		KVM_ARCH_REQ(6)
+#define KVM_REQ_NESTED_SWTLB		KVM_ARCH_REQ(7)
 
 #define __KVM_HAVE_ARCH_FLUSH_REMOTE_TLBS_RANGE
 
@@ -219,6 +221,9 @@ struct kvm_vcpu_arch {
 
 	/* CPU reset state of Guest VCPU */
 	struct kvm_vcpu_reset_state reset_state;
+
+	/* CPU nested virtualization context of Guest VCPU */
+	struct kvm_vcpu_nested nested;
 
 	/*
 	 * VCPU interrupts
