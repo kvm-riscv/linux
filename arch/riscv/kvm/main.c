@@ -111,8 +111,6 @@ static int __init riscv_kvm_init(void)
 		return -ENODEV;
 	}
 
-	kvm_riscv_gstage_vmid_detect();
-
 	rc = kvm_riscv_aia_init();
 	if (rc && rc != -ENODEV) {
 		kvm_riscv_nacl_exit();
@@ -120,6 +118,8 @@ static int __init riscv_kvm_init(void)
 	}
 
 	kvm_riscv_nested_init();
+
+	kvm_riscv_gstage_vmid_detect();
 
 	kvm_info("hypervisor extension available\n");
 
