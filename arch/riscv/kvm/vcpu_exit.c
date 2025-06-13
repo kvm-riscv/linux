@@ -274,12 +274,18 @@ int kvm_riscv_vcpu_exit(struct kvm_vcpu *vcpu, struct kvm_run *run,
 			ret = gstage_page_fault(vcpu, run, trap);
 		break;
 	case EXC_SUPERVISOR_SYSCALL:
-		if (vcpu->arch.guest_context.hstatus & HSTATUS_SPV)
+		if (kvm_riscv_vcpu_nested_virt(vcpu))
+			ret = vcpu_redirect(vcpu, trap);
+		else if (vcpu->arch.guest_context.hstatus & HSTATUS_SPV)
 			ret = kvm_riscv_vcpu_sbi_ecall(vcpu, run);
 		break;
 	case EXC_BREAKPOINT:
-		run->exit_reason = KVM_EXIT_DEBUG;
-		ret = 0;
+		if (kvm_riscv_vcpu_nested_virt(vcpu)) {
+			ret = vcpu_redirect(vcpu, trap);
+		} else {
+			run->exit_reason = KVM_EXIT_DEBUG;
+			ret = 0;
+		}
 		break;
 	default:
 		break;
