@@ -17,6 +17,7 @@
 #define SR_SPP		_AC(0x00000100, UL) /* Previously Supervisor */
 #define SR_MPP		_AC(0x00001800, UL) /* Previously Machine */
 #define SR_SUM		_AC(0x00040000, UL) /* Supervisor User Memory Access */
+#define SR_MXR		_AC(0x00080000, UL) /* Make eXecutable Readable */
 
 #define SR_FS		_AC(0x00006000, UL) /* Floating-point Status */
 #define SR_FS_OFF	_AC(0x00000000, UL)
@@ -59,6 +60,7 @@
 /* SATP flags */
 #ifndef CONFIG_64BIT
 #define SATP_PPN	_AC(0x003FFFFF, UL)
+#define SATP_MODE	_AC(0x80000000, UL)
 #define SATP_MODE_32	_AC(0x80000000, UL)
 #define SATP_MODE_SHIFT	31
 #define SATP_ASID_BITS	9
@@ -66,6 +68,7 @@
 #define SATP_ASID_MASK	_AC(0x1FF, UL)
 #else
 #define SATP_PPN	_AC(0x00000FFFFFFFFFFF, UL)
+#define SATP_MODE	_AC(0xF000000000000000, UL)
 #define SATP_MODE_39	_AC(0x8000000000000000, UL)
 #define SATP_MODE_48	_AC(0x9000000000000000, UL)
 #define SATP_MODE_57	_AC(0xa000000000000000, UL)
@@ -74,6 +77,8 @@
 #define SATP_ASID_SHIFT	44
 #define SATP_ASID_MASK	_AC(0xFFFF, UL)
 #endif
+#define SATP_MODE_OFF	_AC(0, UL)
+#define SATP_ASID	(SATP_ASID_MASK << SATP_ASID_SHIFT)
 
 /* Exception cause high bit - is an interrupt if set */
 #define CAUSE_IRQ_FLAG		(_AC(1, UL) << (__riscv_xlen - 1))
@@ -151,11 +156,13 @@
 #define HGATP_MODE_SV57X4	_AC(10, UL)
 
 #define HGATP32_MODE_SHIFT	31
+#define HGATP32_MODE		GENMASK(31, 31)
 #define HGATP32_VMID_SHIFT	22
 #define HGATP32_VMID		GENMASK(28, 22)
 #define HGATP32_PPN		GENMASK(21, 0)
 
 #define HGATP64_MODE_SHIFT	60
+#define HGATP64_MODE		GENMASK(63, 60)
 #define HGATP64_VMID_SHIFT	44
 #define HGATP64_VMID		GENMASK(57, 44)
 #define HGATP64_PPN		GENMASK(43, 0)
@@ -167,11 +174,13 @@
 #define HGATP_VMID_SHIFT	HGATP64_VMID_SHIFT
 #define HGATP_VMID		HGATP64_VMID
 #define HGATP_MODE_SHIFT	HGATP64_MODE_SHIFT
+#define HGATP_MODE		HGATP64_MODE
 #else
 #define HGATP_PPN		HGATP32_PPN
 #define HGATP_VMID_SHIFT	HGATP32_VMID_SHIFT
 #define HGATP_VMID		HGATP32_VMID
 #define HGATP_MODE_SHIFT	HGATP32_MODE_SHIFT
+#define HGATP_MODE		HGATP32_MODE
 #endif
 
 /* VSIP & HVIP relation */
@@ -236,6 +245,14 @@
 #define MSECCFG_PMM_PMLEN_0		ENVCFG_PMM_PMLEN_0
 #define MSECCFG_PMM_PMLEN_7		ENVCFG_PMM_PMLEN_7
 #define MSECCFG_PMM_PMLEN_16		ENVCFG_PMM_PMLEN_16
+
+#define CSR_NUM_PRIV_SHIFT	8
+#define CSR_NUM_PRIV_MASK	0x3
+
+#define CSR_PRIV_USER		0
+#define CSR_PRIV_SUPERVISOR	1
+#define CSR_PRIV_HYPERVISOR	2
+#define CSR_PRIV_MACHINE	3
 
 /* symbolic CSR names: */
 #define CSR_CYCLE		0xc00

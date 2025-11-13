@@ -178,11 +178,10 @@ void kvm_riscv_vcpu_nested_vsirq_process(struct kvm_vcpu *vcpu)
 void kvm_riscv_vcpu_nested_reset(struct kvm_vcpu *vcpu)
 {
 	struct kvm_vcpu_nested *ns = &vcpu->arch.nested;
-	struct kvm_vcpu_nested_csr *ncsr = &vcpu->arch.nested.csr;
 
 	ns->virt = false;
 	kvm_riscv_vcpu_nested_swtlb_reset(vcpu);
-	memset(ncsr, 0, sizeof(*ncsr));
+	kvm_riscv_vcpu_nested_csr_reset(vcpu);
 }
 
 void kvm_riscv_nested_init(void)

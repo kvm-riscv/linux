@@ -142,6 +142,8 @@ static const struct csr_func csr_funcs[] = {
 	KVM_RISCV_VCPU_AIA_CSR_FUNCS
 	KVM_RISCV_VCPU_HPMCOUNTER_CSR_FUNCS
 	{ .base = CSR_SEED, .count = 1, .func = seed_csr_rmw },
+	KVM_RISCV_VCPU_NESTED_SMODE_CSR_FUNCS
+	KVM_RISCV_VCPU_NESTED_HEXT_CSR_FUNCS
 };
 
 /**
