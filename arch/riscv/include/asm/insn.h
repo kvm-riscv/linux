@@ -331,6 +331,9 @@ static __always_inline bool riscv_insn_is_c_jalr(u32 code)
 #define INSN_OPCODE_SHIFT	2
 #define INSN_OPCODE_SYSTEM	28
 
+#define INSN_MASK_SRET		0xffffffff
+#define INSN_MATCH_SRET		0x10200073
+
 #define INSN_MASK_WFI		0xffffffff
 #define INSN_MATCH_WFI		0x10500073
 

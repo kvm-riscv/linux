@@ -9,6 +9,7 @@
 
 #include <asm/cpufeature.h>
 #include <asm/insn.h>
+#include <asm/kvm_vcpu_nested.h>
 
 struct insn_func {
 	unsigned long mask;
@@ -256,6 +257,11 @@ static const struct insn_func system_opcode_funcs[] = {
 		.mask  = INSN_MASK_CSRRCI,
 		.match = INSN_MATCH_CSRRCI,
 		.func  = csr_insn,
+	},
+	{
+		.mask  = INSN_MASK_SRET,
+		.match = INSN_MATCH_SRET,
+		.func  = kvm_riscv_vcpu_nested_insn_sret,
 	},
 	{
 		.mask  = INSN_MASK_WFI,
