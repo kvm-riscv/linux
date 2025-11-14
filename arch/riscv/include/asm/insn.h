@@ -340,6 +340,12 @@ static __always_inline bool riscv_insn_is_c_jalr(u32 code)
 #define INSN_MASK_WRS		0xffffffff
 #define INSN_MATCH_WRS		0x00d00073
 
+#define INSN_MASK_HFENCE_VVMA	0xfe007fff
+#define INSN_MATCH_HFENCE_VVMA	0x22000073
+
+#define INSN_MASK_HFENCE_GVMA	0xfe007fff
+#define INSN_MATCH_HFENCE_GVMA	0x62000073
+
 #define INSN_MATCH_CSRRW	0x1073
 #define INSN_MASK_CSRRW		0x707f
 #define INSN_MATCH_CSRRS	0x2073

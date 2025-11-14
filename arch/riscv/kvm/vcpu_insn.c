@@ -303,6 +303,16 @@ static const struct insn_func system_opcode_funcs[] = {
 		.match = INSN_MATCH_WRS,
 		.func  = wrs_insn,
 	},
+	{
+		.mask  = INSN_MASK_HFENCE_VVMA,
+		.match = INSN_MATCH_HFENCE_VVMA,
+		.func  = kvm_riscv_vcpu_nested_insn_hfence_vvma,
+	},
+	{
+		.mask  = INSN_MASK_HFENCE_GVMA,
+		.match = INSN_MATCH_HFENCE_GVMA,
+		.func  = kvm_riscv_vcpu_nested_insn_hfence_gvma,
+	},
 };
 
 static int system_opcode_insn(struct kvm_vcpu *vcpu, struct kvm_run *run,

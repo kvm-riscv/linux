@@ -78,6 +78,10 @@ static inline void kvm_riscv_vcpu_nested_timer_start(struct kvm_vcpu *vcpu, u64 
 }
 
 int kvm_riscv_vcpu_nested_insn_sret(struct kvm_vcpu *vcpu, struct kvm_run *run, ulong insn);
+int kvm_riscv_vcpu_nested_insn_hfence_vvma(struct kvm_vcpu *vcpu, struct kvm_run *run,
+					   ulong insn);
+int kvm_riscv_vcpu_nested_insn_hfence_gvma(struct kvm_vcpu *vcpu, struct kvm_run *run,
+					   ulong insn);
 
 int kvm_riscv_vcpu_nested_smode_csr_rmw(struct kvm_vcpu *vcpu, unsigned int csr_num,
 				        unsigned long *val, unsigned long new_val,
