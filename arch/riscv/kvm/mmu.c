@@ -349,30 +349,30 @@ bool kvm_unmap_gfn_range(struct kvm *kvm, struct kvm_gfn_range *range)
 	return false;
 }
 
-bool kvm_age_gfn(struct kvm *kvm, struct kvm_gfn_range *range)
+static bool kvm_riscv_age_gfn(struct kvm *kvm, struct kvm_gfn_range *range,
+			      bool test_only)
 {
 	struct kvm_gstage gstage;
 
-	if (!kvm->arch.pgd)
-		return false;
+	guard(rcu)();
+	lockdep_assert_not_held(&kvm->mmu_lock);
 
 	kvm_riscv_gstage_init(&gstage, kvm);
+	if (!gstage.pgd)
+		return false;
 
 	return kvm_riscv_gstage_age_range(&gstage, range->start << PAGE_SHIFT,
-					  range->end << PAGE_SHIFT, false);
+					  range->end << PAGE_SHIFT, test_only);
+}
+
+bool kvm_age_gfn(struct kvm *kvm, struct kvm_gfn_range *range)
+{
+	return kvm_riscv_age_gfn(kvm, range, false);
 }
 
 bool kvm_test_age_gfn(struct kvm *kvm, struct kvm_gfn_range *range)
 {
-	struct kvm_gstage gstage;
-
-	if (!kvm->arch.pgd)
-		return false;
-
-	kvm_riscv_gstage_init(&gstage, kvm);
-
-	return kvm_riscv_gstage_age_range(&gstage, range->start << PAGE_SHIFT,
-					  range->end << PAGE_SHIFT, true);
+	return kvm_riscv_age_gfn(kvm, range, true);
 }
 
 static bool fault_supports_gstage_huge_mapping(struct kvm_memory_slot *memslot,
