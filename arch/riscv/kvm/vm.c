@@ -55,6 +55,9 @@ void kvm_arch_destroy_vm(struct kvm *kvm)
 
 	kvm_riscv_aia_destroy_vm(kvm);
 
+	/* Wait for pending G-stage page-table RCU callbacks. */
+	rcu_barrier();
+
 	kvm_mmu_free_memory_cache(&kvm->arch.pgd_split_page_cache);
 }
 

@@ -113,7 +113,7 @@ static inline void kvm_riscv_gstage_init(struct kvm_gstage *gstage, struct kvm *
 	gstage->kvm = kvm;
 	gstage->flags = 0;
 	gstage->vmid = READ_ONCE(kvm->arch.vmid.vmid);
-	gstage->pgd = kvm->arch.pgd;
+	gstage->pgd = READ_ONCE(kvm->arch.pgd);
 	gstage->pgd_levels = kvm->arch.pgd_levels;
 }
 
